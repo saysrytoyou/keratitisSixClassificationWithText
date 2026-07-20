@@ -62,6 +62,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def resolve_picture_dir(picture_dir: Path) -> Path:
+    candidate = picture_dir.resolve()
+    if candidate.exists():
+        return candidate
+
+    search_roots = [Path.cwd().resolve(), *Path.cwd().resolve().parents]
+    for root in search_roots:
+        probe = root / "picture"
+        if probe.exists():
+            return probe.resolve()
+    raise FileNotFoundError(f"Picture directory not found: {picture_dir}")
+
+
+
 def resolve_text_xlsx(explicit_path: Path | None) -> Path:
     if explicit_path is not None:
         if not explicit_path.exists():
@@ -183,7 +197,7 @@ def write_outputs(records: List[dict], output_csv: Path, output_summary: Path, p
 
 def main() -> None:
     args = parse_args()
-    picture_dir = args.picture_dir.resolve()
+    picture_dir = resolve_picture_dir(args.picture_dir)
     text_xlsx = resolve_text_xlsx(args.text_xlsx).resolve()
     records = build_records(picture_dir=picture_dir, text_xlsx=text_xlsx, path_mode=args.path_mode)
     write_outputs(

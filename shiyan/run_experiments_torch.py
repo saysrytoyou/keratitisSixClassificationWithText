@@ -264,6 +264,20 @@ def read_manifest(path: Path) -> pd.DataFrame:
     return df
 
 
+def resolve_picture_dir(picture_dir: Path) -> Path:
+    candidate = picture_dir.resolve()
+    if candidate.exists():
+        return candidate
+
+    search_roots = [Path.cwd().resolve(), *Path.cwd().resolve().parents]
+    for root in search_roots:
+        probe = root / "picture"
+        if probe.exists():
+            return probe.resolve()
+    raise FileNotFoundError(f"Picture directory not found: {picture_dir}")
+
+
+
 def remap_single_image_path(raw_path: str, picture_dir: Path) -> str:
     candidate = Path(str(raw_path))
     if candidate.exists():
@@ -660,7 +674,7 @@ def summarize_all_results(
     summary["config"] = {
         "manifest": str(args.manifest.resolve()),
         "output_dir": str(args.output_dir.resolve()),
-        "picture_dir": str(args.picture_dir.resolve()),
+        "picture_dir": str(picture_dir),
         "models": args.models,
         "cv_folds": args.cv_folds,
         "epochs": args.epochs,
@@ -695,8 +709,9 @@ def main() -> None:
     device = get_device(args.device, allow_cpu_fallback=args.allow_cpu_fallback)
     set_seed(args.seed, device)
 
+    picture_dir = resolve_picture_dir(args.picture_dir)
     df = read_manifest(args.manifest.resolve())
-    df = remap_manifest_paths(df, picture_dir=args.picture_dir.resolve())
+    df = remap_manifest_paths(df, picture_dir=picture_dir)
     df, text_column = ensure_text_column(df, args.text_column)
     df = subset_manifest(df, max_samples_per_class=args.max_samples_per_class, seed=args.seed)
 
