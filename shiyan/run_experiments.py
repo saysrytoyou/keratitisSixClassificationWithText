@@ -113,6 +113,44 @@ def read_manifest(path: Path) -> pd.DataFrame:
     return df
 
 
+def remap_single_image_path(raw_path: str, picture_dir: Path) -> str:
+    candidate = Path(str(raw_path))
+    if candidate.exists():
+        return str(candidate)
+
+    normalized = str(raw_path).replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part and part != "."]
+    if "picture" in parts:
+        suffix_parts = parts[parts.index("picture") + 1 :]
+    else:
+        suffix_parts = parts
+
+    remapped = picture_dir.joinpath(*suffix_parts)
+    return str(remapped)
+
+
+
+def remap_path_string(path_string: str, picture_dir: Path) -> str:
+    remapped_paths = []
+    for raw_path in [part.strip() for part in str(path_string).split(";") if part.strip()]:
+        remapped = remap_single_image_path(raw_path, picture_dir=picture_dir)
+        if not Path(remapped).exists():
+            raise FileNotFoundError(
+                f"Image file not found after manifest remap: original={raw_path}, remapped={remapped}"
+            )
+        remapped_paths.append(remapped)
+    return ";".join(remapped_paths)
+
+
+
+def remap_manifest_paths(df: pd.DataFrame, picture_dir: Path) -> pd.DataFrame:
+    resolved = df.copy()
+    for column in ("dli_paths", "fsi_paths", "sbi_paths"):
+        resolved[column] = resolved[column].map(lambda value: remap_path_string(value, picture_dir=picture_dir))
+    return resolved
+
+
+
 def subset_manifest(df: pd.DataFrame, max_samples_per_class: int | None, seed: int) -> pd.DataFrame:
     if max_samples_per_class is None:
         return df.reset_index(drop=True)
@@ -373,6 +411,7 @@ def summarize_results(
 def main() -> None:
     args = parse_args()
     df = read_manifest(args.manifest.resolve())
+    df = remap_manifest_paths(df, picture_dir=args.picture_dir.resolve())
     df, text_column = ensure_text_column(df, args.text_column)
     df = subset_manifest(df, max_samples_per_class=args.max_samples_per_class, seed=args.seed)
 
@@ -513,6 +552,7 @@ def main() -> None:
     summary = summarize_results(per_model_metrics=per_model_metrics, label_names=label_names)
     summary["config"] = {
         "manifest": str(args.manifest.resolve()),
+        "picture_dir": str(args.picture_dir.resolve()),
         "num_samples": int(len(df)),
         "cv_folds": args.cv_folds,
         "seed": args.seed,

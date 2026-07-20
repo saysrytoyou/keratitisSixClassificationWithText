@@ -75,7 +75,13 @@ def resolve_text_xlsx(explicit_path: Path | None) -> Path:
     return files[0]
 
 
-def collect_modality_paths(patient_dir: Path) -> Dict[str, List[str]]:
+def format_manifest_path(file_path: Path, picture_dir: Path, path_mode: str) -> str:
+    if path_mode == "absolute":
+        return str(file_path.resolve())
+    return str(file_path.resolve().relative_to(picture_dir.parent.resolve())).replace("\\", "/")
+
+
+def collect_modality_paths(patient_dir: Path, picture_dir: Path, path_mode: str = "relative") -> Dict[str, List[str]]:
     files = sorted(patient_dir.glob("*.jpg"))
     grouped = {"DLI": [], "FSI": [], "SBI": []}
     for file_path in files:
@@ -83,7 +89,7 @@ def collect_modality_paths(patient_dir: Path) -> Dict[str, List[str]]:
         for modality in grouped:
             # Allow noisy filenames such as "_ DLI_" or "__DLI__" without requiring manual renaming.
             if re.search(rf"[_\s]+{modality}[_\s]+", name):
-                grouped[modality].append(str(file_path.resolve()))
+                grouped[modality].append(format_manifest_path(file_path, picture_dir=picture_dir, path_mode=path_mode))
                 break
     for modality, paths in grouped.items():
         if not paths:
@@ -91,7 +97,7 @@ def collect_modality_paths(patient_dir: Path) -> Dict[str, List[str]]:
     return grouped
 
 
-def build_records(picture_dir: Path, text_xlsx: Path) -> List[dict]:
+def build_records(picture_dir: Path, text_xlsx: Path, path_mode: str = "relative") -> List[dict]:
     xls = pd.ExcelFile(text_xlsx)
     records: List[dict] = []
 
@@ -109,7 +115,7 @@ def build_records(picture_dir: Path, text_xlsx: Path) -> List[dict]:
             )
 
         for patient_dir, (_, row) in zip(image_patients, sheet_df.iterrows()):
-            grouped = collect_modality_paths(patient_dir)
+            grouped = collect_modality_paths(patient_dir, picture_dir=picture_dir, path_mode=path_mode)
             patient_index = int(patient_dir.name.split("_")[-1])
             text_value = str(row.get(TEXT_COLUMN, "")).strip()
             normalized_text = normalize_clinical_text(text_value)
@@ -143,7 +149,7 @@ def build_records(picture_dir: Path, text_xlsx: Path) -> List[dict]:
     return records
 
 
-def write_outputs(records: List[dict], output_csv: Path, output_summary: Path) -> None:
+def write_outputs(records: List[dict], output_csv: Path, output_summary: Path, path_mode: str) -> None:
     output_csv.parent.mkdir(parents=True, exist_ok=True)
     output_summary.parent.mkdir(parents=True, exist_ok=True)
 
@@ -167,6 +173,7 @@ def write_outputs(records: List[dict], output_csv: Path, output_summary: Path) -
             "max": int(df["text_char_count"].max()),
         },
         "patient_index_range": [int(df["patient_index"].min()), int(df["patient_index"].max())],
+        "path_mode": path_mode,
         "output_csv": str(output_csv.resolve()),
     }
     output_summary.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -178,8 +185,13 @@ def main() -> None:
     args = parse_args()
     picture_dir = args.picture_dir.resolve()
     text_xlsx = resolve_text_xlsx(args.text_xlsx).resolve()
-    records = build_records(picture_dir=picture_dir, text_xlsx=text_xlsx)
-    write_outputs(records=records, output_csv=args.output_csv.resolve(), output_summary=args.output_summary.resolve())
+    records = build_records(picture_dir=picture_dir, text_xlsx=text_xlsx, path_mode=args.path_mode)
+    write_outputs(
+        records=records,
+        output_csv=args.output_csv.resolve(),
+        output_summary=args.output_summary.resolve(),
+        path_mode=args.path_mode,
+    )
 
 
 if __name__ == "__main__":

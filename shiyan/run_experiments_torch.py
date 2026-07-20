@@ -102,6 +102,12 @@ def parse_args() -> argparse.Namespace:
         help="Directory for experiment outputs.",
     )
     parser.add_argument(
+        "--picture-dir",
+        type=Path,
+        default=Path.cwd() / "picture",
+        help="Root directory of image data used to remap manifest paths across machines.",
+    )
+    parser.add_argument(
         "--models",
         nargs="+",
         default=["image", "text", "late", "prior", "cpgmf_gate", "cpgmf_film"],
@@ -256,6 +262,44 @@ def read_manifest(path: Path) -> pd.DataFrame:
     if missing:
         raise ValueError(f"Manifest is missing required columns: {sorted(missing)}")
     return df
+
+
+def remap_single_image_path(raw_path: str, picture_dir: Path) -> str:
+    candidate = Path(str(raw_path))
+    if candidate.exists():
+        return str(candidate)
+
+    normalized = str(raw_path).replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part and part != "."]
+    if "picture" in parts:
+        suffix_parts = parts[parts.index("picture") + 1 :]
+    else:
+        suffix_parts = parts
+
+    remapped = picture_dir.joinpath(*suffix_parts)
+    return str(remapped)
+
+
+
+def remap_path_string(path_string: str, picture_dir: Path) -> str:
+    remapped_paths = []
+    for raw_path in [part.strip() for part in str(path_string).split(";") if part.strip()]:
+        remapped = remap_single_image_path(raw_path, picture_dir=picture_dir)
+        if not Path(remapped).exists():
+            raise FileNotFoundError(
+                f"Image file not found after manifest remap: original={raw_path}, remapped={remapped}"
+            )
+        remapped_paths.append(remapped)
+    return ";".join(remapped_paths)
+
+
+
+def remap_manifest_paths(df: pd.DataFrame, picture_dir: Path) -> pd.DataFrame:
+    resolved = df.copy()
+    for column in ("dli_paths", "fsi_paths", "sbi_paths"):
+        resolved[column] = resolved[column].map(lambda value: remap_path_string(value, picture_dir=picture_dir))
+    return resolved
+
 
 
 def subset_manifest(df: pd.DataFrame, max_samples_per_class: int | None, seed: int) -> pd.DataFrame:
@@ -616,6 +660,7 @@ def summarize_all_results(
     summary["config"] = {
         "manifest": str(args.manifest.resolve()),
         "output_dir": str(args.output_dir.resolve()),
+        "picture_dir": str(args.picture_dir.resolve()),
         "models": args.models,
         "cv_folds": args.cv_folds,
         "epochs": args.epochs,
@@ -651,6 +696,7 @@ def main() -> None:
     set_seed(args.seed, device)
 
     df = read_manifest(args.manifest.resolve())
+    df = remap_manifest_paths(df, picture_dir=args.picture_dir.resolve())
     df, text_column = ensure_text_column(df, args.text_column)
     df = subset_manifest(df, max_samples_per_class=args.max_samples_per_class, seed=args.seed)
 
