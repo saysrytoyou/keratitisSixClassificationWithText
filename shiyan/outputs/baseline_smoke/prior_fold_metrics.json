@@ -1,0 +1,218 @@
+{
+  "folds": [
+    {
+      "accuracy": 0.1111111111111111,
+      "macro_f1": 0.1111111111111111,
+      "confusion_matrix": [
+        [
+          0,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          1,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "classification_report": {
+        "单纯疱疹病毒性角膜炎-上皮/混合型": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2
+        },
+        "其他疱疹病毒性角膜炎": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1
+        },
+        "细菌性角膜炎": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2
+        },
+        "真菌性角膜炎": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6666666666666666,
+          "support": 1
+        },
+        "正常": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2
+        },
+        "非感染性角膜炎": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1
+        },
+        "accuracy": 0.1111111111111111,
+        "macro avg": {
+          "precision": 0.08333333333333333,
+          "recall": 0.16666666666666666,
+          "f1-score": 0.1111111111111111,
+          "support": 9
+        },
+        "weighted avg": {
+          "precision": 0.05555555555555555,
+          "recall": 0.1111111111111111,
+          "f1-score": 0.07407407407407407,
+          "support": 9
+        }
+      },
+      "fold_id": 1,
+      "prior_weight": 0.75
+    },
+    {
+      "accuracy": 0.4444444444444444,
+      "macro_f1": 0.31666666666666665,
+      "confusion_matrix": [
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      ],
+      "classification_report": {
+        "单纯疱疹病毒性角膜炎-上皮/混合型": {
+          "precision": 0.25,
+          "recall": 1.0,
+          "f1-score": 0.4,
+          "support": 1
+        },
+        "其他疱疹病毒性角膜炎": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2
+        },
+        "细菌性角膜炎": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1
+        },
+        "真菌性角膜炎": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2
+        },
+        "正常": {
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "f1-score": 0.5,
+          "support": 1
+        },
+        "非感染性角膜炎": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 2
+        },
+        "accuracy": 0.4444444444444444,
+        "macro avg": {
+          "precision": 0.2638888888888889,
+          "recall": 0.5,
+          "f1-score": 0.31666666666666665,
+          "support": 9
+        },
+        "weighted avg": {
+          "precision": 0.28703703703703703,
+          "recall": 0.4444444444444444,
+          "f1-score": 0.3222222222222222,
+          "support": 9
+        }
+      },
+      "fold_id": 2,
+      "prior_weight": 0.75
+    }
+  ]
+}

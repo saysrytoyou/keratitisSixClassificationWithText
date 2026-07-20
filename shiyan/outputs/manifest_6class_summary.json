@@ -1,0 +1,36 @@
+{
+  "num_samples": 1121,
+  "num_classes": 6,
+  "class_distribution": {
+    "单纯疱疹病毒性角膜炎-上皮/混合型": 169,
+    "其他疱疹病毒性角膜炎": 254,
+    "细菌性角膜炎": 200,
+    "真菌性角膜炎": 130,
+    "正常": 193,
+    "非感染性角膜炎": 175
+  },
+  "modality_image_count_range": {
+    "DLI": [
+      1,
+      4
+    ],
+    "FSI": [
+      1,
+      4
+    ],
+    "SBI": [
+      1,
+      4
+    ]
+  },
+  "text_char_count": {
+    "min": 17,
+    "median": 59.0,
+    "max": 269
+  },
+  "patient_index_range": [
+    1,
+    1121
+  ],
+  "output_csv": "D:\\研究生\\研究生项目\\小论文2\\shiyan\\outputs\\manifest_6class.csv"
+}
