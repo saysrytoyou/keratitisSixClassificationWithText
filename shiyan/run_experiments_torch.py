@@ -658,6 +658,7 @@ def summarize_all_results(
     args: argparse.Namespace,
     device: torch.device,
     text_column: str,
+    picture_dir: Path,
 ) -> dict:
     summary = {}
     for model_name, fold_metrics in all_metrics.items():
@@ -746,7 +747,7 @@ def main() -> None:
             all_metrics[model_name].append(fold_metrics)
             all_predictions.append(pred_frame)
 
-    summary = summarize_all_results(all_metrics, label_names, args, device, text_column)
+    summary = summarize_all_results(all_metrics, label_names, args, device, text_column, picture_dir)
     save_json(output_dir / "summary.json", summary)
 
     for model_name, metrics_list in all_metrics.items():
