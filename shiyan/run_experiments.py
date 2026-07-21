@@ -19,6 +19,14 @@ from sklearn.preprocessing import StandardScaler
 from text_utils import normalize_clinical_text
 
 
+VIRTUAL_TEXT_COLUMNS = {
+    "raw_text_clean",
+    "clinical_text_basic",
+    "clinical_text_with_diag",
+    "diagnosis_text",
+}
+
+
 MODALITIES = ("DLI", "FSI", "SBI")
 RESAMPLING_BILINEAR = Image.Resampling.BILINEAR if hasattr(Image, "Resampling") else Image.BILINEAR
 
@@ -76,7 +84,7 @@ def parse_args() -> argparse.Namespace:
         "--text-column",
         type=str,
         default="raw_text_clean",
-        help="Manifest column used for text modeling.",
+        help="Manifest column used for text modeling. Supports raw_text_clean, clinical_text_basic, clinical_text_with_diag, diagnosis_text.",
     )
     parser.add_argument("--text-ngram-min", type=int, default=1, help="Minimum TF-IDF ngram length.")
     parser.add_argument("--text-ngram-max", type=int, default=2, help="Maximum TF-IDF ngram length.")
@@ -226,14 +234,39 @@ def build_image_features(df: pd.DataFrame, image_size: int, cache_path: Path | N
     return feature_array
 
 
+def compose_virtual_text_column(df: pd.DataFrame, text_column: str) -> pd.Series:
+    raw_text = df["raw_text"].fillna("").astype(str).map(normalize_clinical_text) if "raw_text" in df.columns else pd.Series([""] * len(df), index=df.index)
+    diagnosis = df["diagnosis"].fillna("").astype(str).map(normalize_clinical_text) if "diagnosis" in df.columns else pd.Series([""] * len(df), index=df.index)
+    eye = df["eye"].fillna("").astype(str).map(normalize_clinical_text) if "eye" in df.columns else pd.Series([""] * len(df), index=df.index)
+
+    if text_column in ("raw_text_clean", "clinical_text_basic"):
+        return raw_text
+    if text_column == "diagnosis_text":
+        return diagnosis
+    if text_column == "clinical_text_with_diag":
+        assembled = []
+        for diag, eye_value, raw in zip(diagnosis.tolist(), eye.tolist(), raw_text.tolist()):
+            parts = []
+            if diag:
+                parts.append(f"???{diag}")
+            if eye_value:
+                parts.append(f"???{eye_value}")
+            if raw:
+                parts.append(raw)
+            assembled.append(" ".join(parts).strip())
+        return pd.Series(assembled, index=df.index)
+    raise ValueError(f"Unsupported virtual text column: {text_column}")
+
+
+
 def ensure_text_column(df: pd.DataFrame, text_column: str) -> tuple[pd.DataFrame, str]:
     if text_column in df.columns:
         return df, text_column
-    if text_column == "raw_text_clean" and "raw_text" in df.columns:
+    if text_column in VIRTUAL_TEXT_COLUMNS:
         resolved = df.copy()
-        resolved["raw_text_clean"] = resolved["raw_text"].fillna("").astype(str).map(normalize_clinical_text)
-        return resolved, "raw_text_clean"
-    raise ValueError(f"manifest ???????? {text_column}")
+        resolved[text_column] = compose_virtual_text_column(resolved, text_column)
+        return resolved, text_column
+    raise ValueError(f"manifest missing text column: {text_column}")
 
 
 def build_text_vectorizer(max_features: int, ngram_min: int, ngram_max: int) -> TfidfVectorizer:
