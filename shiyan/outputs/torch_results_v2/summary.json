@@ -1,0 +1,129 @@
+{
+  "image": {
+    "mean_accuracy": 0.44511111111111107,
+    "std_accuracy": 0.029078434192662463,
+    "mean_macro_f1": 0.43559717337536685,
+    "std_macro_f1": 0.030329298127291703,
+    "num_folds": 5,
+    "labels": [
+      "单纯疱疹病毒性角膜炎-上皮/混合型",
+      "其他疱疹病毒性角膜炎",
+      "细菌性角膜炎",
+      "真菌性角膜炎",
+      "正常",
+      "非感染性角膜炎"
+    ]
+  },
+  "text": {
+    "mean_accuracy": 0.6583492063492062,
+    "std_accuracy": 0.008841830864762567,
+    "mean_macro_f1": 0.6447248569674273,
+    "std_macro_f1": 0.013649348790960752,
+    "num_folds": 5,
+    "labels": [
+      "单纯疱疹病毒性角膜炎-上皮/混合型",
+      "其他疱疹病毒性角膜炎",
+      "细菌性角膜炎",
+      "真菌性角膜炎",
+      "正常",
+      "非感染性角膜炎"
+    ]
+  },
+  "late": {
+    "mean_accuracy": 0.6529603174603175,
+    "std_accuracy": 0.03151489867504513,
+    "mean_macro_f1": 0.648351022728262,
+    "std_macro_f1": 0.02790486543845197,
+    "num_folds": 5,
+    "labels": [
+      "单纯疱疹病毒性角膜炎-上皮/混合型",
+      "其他疱疹病毒性角膜炎",
+      "细菌性角膜炎",
+      "真菌性角膜炎",
+      "正常",
+      "非感染性角膜炎"
+    ]
+  },
+  "prior": {
+    "mean_accuracy": 0.659218253968254,
+    "std_accuracy": 0.027337357749932543,
+    "mean_macro_f1": 0.6496427420081924,
+    "std_macro_f1": 0.029041978090842715,
+    "num_folds": 5,
+    "labels": [
+      "单纯疱疹病毒性角膜炎-上皮/混合型",
+      "其他疱疹病毒性角膜炎",
+      "细菌性角膜炎",
+      "真菌性角膜炎",
+      "正常",
+      "非感染性角膜炎"
+    ]
+  },
+  "cpgmf_gate": {
+    "mean_accuracy": 0.648515873015873,
+    "std_accuracy": 0.024998631229851107,
+    "mean_macro_f1": 0.637693412154345,
+    "std_macro_f1": 0.020597722894213594,
+    "num_folds": 5,
+    "labels": [
+      "单纯疱疹病毒性角膜炎-上皮/混合型",
+      "其他疱疹病毒性角膜炎",
+      "细菌性角膜炎",
+      "真菌性角膜炎",
+      "正常",
+      "非感染性角膜炎"
+    ]
+  },
+  "cpgmf_film": {
+    "mean_accuracy": 0.6565436507936508,
+    "std_accuracy": 0.013549657651548795,
+    "mean_macro_f1": 0.6445244022046063,
+    "std_macro_f1": 0.016354117568796987,
+    "num_folds": 5,
+    "labels": [
+      "单纯疱疹病毒性角膜炎-上皮/混合型",
+      "其他疱疹病毒性角膜炎",
+      "细菌性角膜炎",
+      "真菌性角膜炎",
+      "正常",
+      "非感染性角膜炎"
+    ]
+  },
+  "config": {
+    "manifest": "/mnt/rlf/byf/xiaolunwen2/keratitisSixClassificationWithText/shiyan/outputs/manifest_6class.csv",
+    "output_dir": "/mnt/rlf/byf/xiaolunwen2/keratitisSixClassificationWithText/shiyan/outputs/torch_results_v2",
+    "picture_dir": "/mnt/rlf/byf/xiaolunwen2/picture",
+    "models": [
+      "image",
+      "text",
+      "late",
+      "prior",
+      "cpgmf_gate",
+      "cpgmf_film"
+    ],
+    "cv_folds": 5,
+    "epochs": 20,
+    "batch_size": 16,
+    "num_workers": 4,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "image_size": 224,
+    "text_max_features": 4096,
+    "text_column": "raw_text_clean",
+    "text_ngram_min": 1,
+    "text_ngram_max": 2,
+    "feature_dim": 256,
+    "seed": 42,
+    "max_samples_per_class": null,
+    "device": "cuda:0",
+    "requested_device": "cuda",
+    "allow_cpu_fallback": false,
+    "cuda_available": true,
+    "cuda_name": "NVIDIA RTX 6000 Ada Generation",
+    "use_class_weights": true,
+    "min_epochs": 5,
+    "early_stop_patience": 5,
+    "lr_scheduler_patience": 2,
+    "lr_scheduler_factor": 0.5
+  }
+}
